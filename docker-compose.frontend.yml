@@ -6,7 +6,7 @@ services:
     container_name: builder_clients
     working_dir: /app
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       # 👇 CAMBIO AQUÍ: Agregamos /api/v1 al final
       - VITE_API_URL=https://api.orthoix.bengix.mx/api/v1
       # 👇 OPCIONAL: Agrega también la de WebSockets por si la usas
