@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  builder:
+    image: node:20-alpine
+    container_name: builder_clients
+    working_dir: /app
+    environment:
+      - NODE_ENV=production
+      # 👇 CAMBIO AQUÍ: Agregamos /api/v1 al final
+      - VITE_API_URL=https://api.orthoix.bengix.mx/api/v1
+      # 👇 OPCIONAL: Agrega también la de WebSockets por si la usas
+      - VITE_WS_URL=https://api.orthoix.bengix.mx
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - ./build:/app/build
+    command: >
+      sh -c "npm ci && npm run build"

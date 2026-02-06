@@ -1,0 +1,54 @@
+name: Deploy Frontend Clients
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'orthoix-clients/**'
+      - '.github/workflows/deploy.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            echo "🚀 Deploying OrthoIX Clients..."
+
+            # 1. Ir al directorio
+            cd /srv/apps/react/orthoix-clients
+
+            # 2. Actualizar código
+            git checkout -- .
+            git pull origin main
+
+            # 3. LIMPIEZA PROFUNDA (Esto arregla el error code 2)
+            # El flag '-v' borra los volúmenes (node_modules viejos)
+            echo "🧹 Cleaning old volumes..."
+            docker compose -f docker-compose.frontend.yml down -v
+
+            # 4. Construir con Docker (MODIFICADO)
+            # --exit-code-from builder: Si el build falla, el script se detiene aquí.
+            echo "🔨 Building React App..."
+            docker compose -f docker-compose.frontend.yml up --build --exit-code-from builder
+
+            # 5. Limpieza post-build
+            docker compose -f docker-compose.frontend.yml down -v
+
+            # 6. Permisos
+            echo "🔒 Fixing permissions..."
+            sudo chown -R www-data:www-data build/
+            sudo chmod -R 755 build/
+
+            # 7. Recargar Nginx
+            echo "🔄 Reloading Nginx Container..."
+            docker exec nginx_proxy nginx -s reload
+
+            echo "✅ OrthoIX Clients deployed successfully!"
