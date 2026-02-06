@@ -1,4 +1,4 @@
-name: Deploy Frontend Clients.
+name: Deploy Frontend Clients
 
 on:
   push:
