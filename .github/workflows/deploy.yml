@@ -4,10 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'orthoix-clients/**'
-      - '.github/workflows/deploy.yml'
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
